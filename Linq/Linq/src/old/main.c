@@ -1,9 +1,9 @@
 #include "game.h"
 #include "network.h"
 
-int main() {
+int main(int argc, char **argv) {
     // Start the server on port 12345
-    int serverSocket = startServer(12345);
+    int serverSocket = startServer(8080);
 
     // Initialize the game with 4 players
     Game game;
