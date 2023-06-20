@@ -51,24 +51,20 @@ void melangerDeck()
 void printDeck()
 {
         int i,j;
-
+        printf("Affichage du deck:\n");
         for (i=0;i<5;i++)
                 printf("%d:%d\n",i,deck[i]);
 }
 
 void printClients()
 {
-        int i;
-
-        for (i=0;i<nbClients;i++)
+        for (int i=0;i<nbClients;i++)
                 printf("%d: %s %5.5d %s %s %s %d %d\n",i,tcpClients[i].ipAddress, tcpClients[i].port, tcpClients[i].name, tcpClients[i].words[0], tcpClients[i].words[1],tcpClients[i].score, tcpClients[i].role);
 }
 
 int findClientByName(char *name)
 {
-        int i;
-
-        for (i=0;i<nbClients;i++)
+        for (int i=0;i<nbClients;i++)
                 if (strcmp(tcpClients[i].name,name)==0)
                         return i;
         return -1;
@@ -108,12 +104,25 @@ void sendMessageToClient(char *clientip,int clientport,char *mess)
 
 void broadcastMessage(char *mess)
 {
-        int i;
+        for (int i=0;i<nbClients;i++)
+                sendMessageToClient(tcpClients[i].ipAddress,tcpClients[i].port,mess);
+}
 
-        for (i=0;i<nbClients;i++)
-                sendMessageToClient(tcpClients[i].ipAddress,
-                        tcpClients[i].port,
-                        mess);
+void affecterRoles(){
+        char message[100];
+        int n = rand()%10 + 1;
+        //printf("Valeur de N:%d\n",n);
+        for(int i=0;i<nbClients;i++){//Problème à partir d'ici
+                
+                if(deck[i]==1){
+                        sprintf(message,"R %d %s", deck[i], mpts[n]);
+                        sendMessageToClient(tcpClients[i].ipAddress,tcpClients[i].port,message);
+                }else{
+                        sprintf(message,"R %d %s", deck[i],"?");
+                        sendMessageToClient(tcpClients[i].ipAddress,tcpClients[i].port,message);
+                }
+                //printf("%s",message);
+        }
 }
 
 int main(int argc, char *argv[])
@@ -182,6 +191,7 @@ int main(int argc, char *argv[])
 
         if (fsmServer==0)
         {
+                printf("fsmServer:%d\n",fsmServer);
         	switch (buffer[0])
         	{
                 	case 'C':
@@ -194,6 +204,8 @@ int main(int argc, char *argv[])
                                 strcpy(tcpClients[nbClients].name,clientName);
                                 nbClients++;
 
+                                // printf("\nNombre de client:%d\n",nbClients);
+
                                 printClients();
 
 				// rechercher l'id du joueur qui vient de se connecter
@@ -204,9 +216,7 @@ int main(int argc, char *argv[])
 				// lui envoyer un message personnel pour lui communiquer son id
 
                                 sprintf(reply,"I %d",id);
-                                sendMessageToClient(tcpClients[id].ipAddress,
-                                       tcpClients[id].port,
-                                       reply);
+                                sendMessageToClient(tcpClients[id].ipAddress,tcpClients[id].port,reply);
 
 				// Envoyer un message broadcast pour communiquer a tout le monde la liste des joueurs actuellement
 				// connectes
@@ -214,22 +224,18 @@ int main(int argc, char *argv[])
                                 sprintf(reply,"L %s %s %s %s %s", tcpClients[0].name, tcpClients[1].name, tcpClients[2].name, tcpClients[3].name,tcpClients[4].name);
                                 broadcastMessage(reply);
 
-				// Si le nombre de joueurs atteint 4, alors on peut lancer le jeu
-
+				// Si le nombre de joueurs atteint 5, alors on peut lancer le jeu
                                 if (nbClients==5)
 				{
-                                        fsmServer=1;
-					/*
-					melangerDeck();
+					printf("\nOK1\n");
+					//melangerDeck();
 					affecterRoles();
-					razJoueurs();
+					/*razJoueurs();
 					broadcastRoles();
-					tirer mot au hasard
-					pour les espions
-						envoyer lle mot
+					//tirer mot au hasard pour les espions envoyer lle mot
 					joueurSuivant=0;
-					nbReponses=0;
-					*/
+					nbReponses=0;*/
+                                        fsmServer=1;
 				}
 				break;
                 }
@@ -245,8 +251,8 @@ int main(int argc, char *argv[])
 					nbReponses++;
 					if nbReponses==10
 					alors
-						on passe à l'écran suivant
-					*/
+						on passe à l'écran suivant*/
+                                        
 				}
                 	default:
                         	break;
